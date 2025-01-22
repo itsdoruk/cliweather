@@ -1,4 +1,4 @@
-# cliweather
+# CLIWeather
 CLI weather checking program written in Rust
 
 ## Getting Started
