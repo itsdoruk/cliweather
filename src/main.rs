@@ -75,20 +75,20 @@ async fn main() -> Result<(), Box<dyn StdError>> {
         table.set_format(*format::consts::FORMAT_NO_LINESEP_WITH_TITLE);
         
         table.add_row(Row::new(vec![
-            Cell::new("City"),
-            Cell::new(&weather_response.name),
+            Cell::new("city").style_spec("cb"),
+            Cell::new(&weather_response.name).style_spec("cb"),
         ]));
         table.add_row(Row::new(vec![
-            Cell::new("Temperature (°C)"),
-            Cell::new(&weather_response.main.temp.to_string()),
+            Cell::new("temperature (°C)").style_spec("cb"),
+            Cell::new(&weather_response.main.temp.to_string()).style_spec("cb"),
         ]));
         table.add_row(Row::new(vec![
-            Cell::new("Pressure (hPa)"),
-            Cell::new(&weather_response.main.pressure.to_string()),
+            Cell::new("pressure (hPa)").style_spec("cb"),
+            Cell::new(&weather_response.main.pressure.to_string()).style_spec("cb"),
         ]));
         table.add_row(Row::new(vec![
-            Cell::new("Humidity (%)"),
-            Cell::new(&weather_response.main.humidity.to_string()),
+            Cell::new("humidity (%)").style_spec("cb"),
+            Cell::new(&weather_response.main.humidity.to_string()).style_spec("cb"),
         ]));
 
         // Print the table
@@ -96,7 +96,7 @@ async fn main() -> Result<(), Box<dyn StdError>> {
     } else {
         // Print the error message if the request was not successful
         let error_message: serde_json::Value = response.json().await?;
-        println!("Error: {}", error_message);
+        println!("error: {}", error_message);
     }
 
     Ok(())
