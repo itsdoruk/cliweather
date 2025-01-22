@@ -1,6 +1,6 @@
 [package]
 name = "cliweather"
-version = "0.1.0"
+version = "0.1.5"
 edition = "2021"
 description = "CLI weather checking program written in Rust"
 license = "GPL-3.0"

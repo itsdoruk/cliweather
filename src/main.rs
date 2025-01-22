@@ -75,20 +75,20 @@ async fn main() -> Result<(), Box<dyn StdError>> {
         table.set_format(*format::consts::FORMAT_NO_LINESEP_WITH_TITLE);
         
         table.add_row(Row::new(vec![
-            Cell::new("city").style_spec("cb"),
-            Cell::new(&weather_response.name).style_spec("cb"),
+            Cell::new("city").style_spec("c"),
+            Cell::new(&weather_response.name).style_spec("c"),
         ]));
         table.add_row(Row::new(vec![
-            Cell::new("temperature (°C)").style_spec("cb"),
-            Cell::new(&weather_response.main.temp.to_string()).style_spec("cb"),
+            Cell::new("temperature (°C)").style_spec("c"),
+            Cell::new(&weather_response.main.temp.to_string()).style_spec("c"),
         ]));
         table.add_row(Row::new(vec![
-            Cell::new("pressure (hPa)").style_spec("cb"),
-            Cell::new(&weather_response.main.pressure.to_string()).style_spec("cb"),
+            Cell::new("pressure (hPa)").style_spec("c"),
+            Cell::new(&weather_response.main.pressure.to_string()).style_spec("c"),
         ]));
         table.add_row(Row::new(vec![
-            Cell::new("humidity (%)").style_spec("cb"),
-            Cell::new(&weather_response.main.humidity.to_string()).style_spec("cb"),
+            Cell::new("humidity (%)").style_spec("c"),
+            Cell::new(&weather_response.main.humidity.to_string()).style_spec("c"),
         ]));
 
         // Print the table
