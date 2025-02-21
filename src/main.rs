@@ -3,11 +3,14 @@ use std::error::Error as StdError;
 use std::fs;
 use std::io::{self, Write};
 use prettytable::{Table, Row, Cell, format};
+use crossterm::{execute, terminal::{self, ClearType}, style::{self, Color, StyledContent, Stylize}};
+use std::io::stdout;
 
 #[derive(Deserialize)]
 struct WeatherResponse {
     main: Main,
     name: String,
+    weather: Vec<WeatherCondition>,
 }
 
 #[derive(Deserialize)]
@@ -15,6 +18,11 @@ struct Main {
     temp: f64,
     pressure: i32,
     humidity: i32,
+}
+
+#[derive(Deserialize)]
+struct WeatherCondition {
+    description: String,
 }
 
 const CONFIG_FILE: &str = "config.txt";
@@ -45,8 +53,30 @@ fn get_config() -> (String, String) {
     (api_key.trim().to_string(), city.trim().to_string())
 }
 
+fn get_weather_icon(description: &str) -> &str {
+    match description.to_lowercase().as_str() {
+        "clear sky" => "☀️", // Sunny
+        "few clouds" => "🌤️", // Partly cloudy
+        "scattered clouds" => "🌥️", // Partly cloudy
+        "broken clouds" => "☁️", // Cloudy
+        "shower rain" => "🌧️", // Rainy
+        "rain" => "🌧️", // Rainy
+        "thunderstorm" => "⛈️", // Thunderstorm
+        "snow" => "❄️", // Snowy
+        "mist" | "haze" => "🌫️", // Haze
+        "fog" => "🌫️", // Fog
+        "dust" => "🌪️", // Dust
+        "sand" => "🌪️", // Sand
+        "tornado" => "🌪️", // Tornado
+        _ => "🌈", // Default icon for unknown conditions
+    }
+}
+
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn StdError>> {
+    // Clear the terminal
+    execute!(stdout(), terminal::Clear(ClearType::All))?;
+
     // Get the API key from the config
     let (api_key, default_city) = get_config();
 
@@ -71,34 +101,48 @@ async fn main() -> Result<(), Box<dyn StdError>> {
         // Attempt to deserialize the response
         let weather_response: WeatherResponse = response.json().await?;
 
+        // Get the weather icon based on the description
+        let weather_icon = get_weather_icon(&weather_response.weather[0].description);
+
+        // Create a fancy table
         let mut table = Table::new();
         table.set_format(*format::consts::FORMAT_NO_LINESEP_WITH_TITLE);
         
+        // Add rows with styled content
         table.add_row(Row::new(vec![
-            Cell::new("city").style_spec("c"),
+            Cell::new("🌆 City").style_spec("c"),
             Cell::new(&weather_response.name).style_spec("c"),
         ]));
         table.add_row(Row::new(vec![
-            Cell::new("temperature (°C)").style_spec("c"),
+            Cell::new("🌡️ Temperature (°C)").style_spec("c"),
             Cell::new(&weather_response.main.temp.to_string()).style_spec("c"),
         ]));
         table.add_row(Row::new(vec![
-            Cell::new("pressure (hPa)").style_spec("c"),
+            Cell::new("💧 Humidity (%)").style_spec("c"),
+            Cell::new(&weather_response.main.humidity.to_string()).style_spec("c"),
+        ]));
+        table.add_row(Row::new(vec![
+            Cell::new("🌬️ Pressure (hPa)").style_spec("c"),
             Cell::new(&weather_response.main.pressure.to_string()).style_spec("c"),
         ]));
         table.add_row(Row::new(vec![
-            Cell::new("humidity (%)").style_spec("c"),
-            Cell::new(&weather_response.main.humidity.to_string()).style_spec("c"),
+            Cell::new("🌤️ Condition").style_spec("c"),
+            Cell::new(format!("{} {}", weather_icon, weather_response.weather[0].description).as_str()).style_spec("c"),
         ]));
+
+        // Print the table with a styled header
+        println!();
+        let title_style = style::style("Weather Information").with(Color::Blue).bold();
+        println!("{}", title_style);
+        println!();
 
         // Print the table
         table.printstd();
     } else {
         // Print the error message if the request was not successful
         let error_message: serde_json::Value = response.json().await?;
-        println!("error: {}", error_message);
+        println!("❌ Error: {}", error_message);
     }
 
     Ok(())
 }
-
